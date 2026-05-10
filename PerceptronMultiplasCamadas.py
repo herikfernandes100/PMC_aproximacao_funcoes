@@ -2,6 +2,7 @@ import csv
 import json
 import math
 import random
+import matplotlib.pyplot as plt
 
 
 class PerceptronMultiplasCamadas:
@@ -14,7 +15,7 @@ class PerceptronMultiplasCamadas:
         self.SAIDAS = 1
         self.PRECISAO = 0.000001
         self.TAXA_APRENDIZADO = 0.1
-        self.MAX_EPOCAS = 1000
+        self.MAX_EPOCAS = 10000
 
         # Camadas
         self.entradas = [0.0] * self.ENTRADAS
@@ -33,17 +34,20 @@ class PerceptronMultiplasCamadas:
             for _ in range(self.HIDDEN + 1)
         ]
 
+        # Erros
+        self.historico_erro = []
+
     def inicializar_pesos(self):
 
         # Entrada -> Hidden
         for i in range(self.ENTRADAS):
             for j in range(self.HIDDEN):
-                self.pesos_entrada_hidden[i][j] = random.uniform(-1.0, 1.0)
+                self.pesos_entrada_hidden[i][j] = random.uniform(0, 1.0)
 
         # Hidden -> Saída
         for i in range(self.HIDDEN + 1):
             for j in range(self.SAIDAS):
-                self.pesos_hidden_saida[i][j] = random.uniform(-1.0, 1.0)
+                self.pesos_hidden_saida[i][j] = random.uniform(0, 1.0)
 
     def sigmoid(self, u):
         return 1/(1 + math.exp(-u))
@@ -98,22 +102,26 @@ class PerceptronMultiplasCamadas:
                 ajuste = (taxa_aprendizado * delta_hidden[j] * self.entradas[i])
                 self.pesos_entrada_hidden[i][j] += ajuste
 
-    def treinar(self, dados, taxa_aprendizado, epocas):
+    def treinar(self, dados):
 
-        for epoca in range(epocas):
+        for epoca in range(self.MAX_EPOCAS):
             erro_total = 0.0
 
             for entradas, desejado in dados:
                 saida = self.forward(entradas[0], entradas[1], entradas[2])
                 erro = desejado - saida
                 erro_total += erro**2
-                self.backpropagation(desejado, taxa_aprendizado)
-                
+                self.backpropagation(desejado, self.TAXA_APRENDIZADO)
             erro_quadratico_medio = erro_total / len(dados)
+            self.historico_erro.append(erro_quadratico_medio)
 
             if erro_quadratico_medio < self.PRECISAO:
                 print("Treinamento concluído com precisão atingida.")
                 break
+
+        print("\nTreinamento concluído!")
+        print(f"Épocas: {epoca + 1}")
+        print(f"EQM Final: {erro_quadratico_medio:.6f}")
 
     def carregar_dados(self, caminho_arquivo):
         dados = []
@@ -154,3 +162,43 @@ class PerceptronMultiplasCamadas:
         self.pesos_hidden_saida = dados[
             "pesos_hidden_saida"
         ]
+
+    def plotar_erro(self):
+
+        plt.plot(self.historico_erro)
+        plt.title("Evolução do Erro Quadrático durante o Treinamento")
+        plt.xlabel("Épocas")
+        plt.ylabel("Erro Quadrático Médio")
+        plt.grid(True)
+        plt.show()
+
+    def validar(self, dados_validacao):
+        resultados = []
+        erro_total = 0.0
+
+        for entradas, desejado in dados_validacao:
+            saida = self.forward(entradas[0], entradas[1], entradas[2])
+            erro = desejado - saida
+            erro_total += erro ** 2
+
+            resultado = {
+                "entrada": entradas,
+                "desejado": round(desejado, 4),
+                "saida": round(saida, 4),
+                "erro": round(erro, 4)
+            }
+
+            resultados.append(resultado)
+
+        eqm_validacao = erro_total / len(dados_validacao)
+
+        return eqm_validacao, resultados
+    
+    def salvar_validacao(self, nome_arquivo, eqm_validacao, resultados):
+        dados_json = {
+            "eqm_validacao": round(eqm_validacao, 6),
+            "resultados": resultados
+        }
+
+        with open(nome_arquivo, "w") as arquivo:
+            json.dump(dados_json, arquivo, indent=4)

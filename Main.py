@@ -1,43 +1,67 @@
 from PerceptronMultiplasCamadas import PerceptronMultiplasCamadas
 
-mlp = PerceptronMultiplasCamadas()
+ARQUIVO_TREINO = "DadosTreinamento.csv"
+ARQUIVO_VALIDACAO = "DadosValidacao.csv"
 
-mlp.inicializar_pesos()
-dados_treinamento = mlp.carregar_dados("DadosTreinamento.csv")
+while True:
 
-dados_validacao = mlp.carregar_dados("DadosValidacao.csv")
+    print("\n1 - Treinar")
+    print("2 - Validar")
+    print("3 - Treinar e Validar")
+    print("4 - Sair")
 
-# Treinamento
+    opcao = input("\nEscolha: ")
 
-mlp.treinar(dados_treinamento,mlp.TAXA_APRENDIZADO,mlp.MAX_EPOCAS)
-mlp.salvar_modelo("modelo1.json")
+    # TREINAR
+    if opcao == "1":
 
-# Validação
+        for i in range(1, 6):
+            print(f"\nTREINAMENTO {i}")
+            mlp = PerceptronMultiplasCamadas()
+            mlp.inicializar_pesos()
 
-print("\nVALIDAÇÃO:\n")
+            dados_treinamento = mlp.carregar_dados(ARQUIVO_TREINO)
 
-erro_total = 0.0
+            mlp.treinar(dados_treinamento)
+            mlp.salvar_modelo(f"modelo_{i}.json")
 
-for entradas, desejado in dados_validacao:
+            mlp.plotar_erro()
 
-    saida = mlp.forward(
-        entradas[0],
-        entradas[1],
-        entradas[2]
-    )
+    # VALIDAR
+    elif opcao == "2":
 
-    erro = desejado - saida
+        for i in range(1, 6):
+            print(f"\nVALIDAÇÃO {i}")
+            mlp = PerceptronMultiplasCamadas()
+            mlp.carregar_modelo(f"modelo_{i}.json")
 
-    erro_total += erro ** 2
+            dados_validacao = mlp.carregar_dados(ARQUIVO_VALIDACAO)
+            eqm, resultados = mlp.validar(dados_validacao)
 
-    print(
-        f"Entrada: {entradas} | "
-        f"Desejado: {desejado:.4f} | "
-        f"Saída: {saida:.4f}"
-    )
+            mlp.salvar_validacao(f"validacao_{i}.json",eqm,resultados)
 
-# EQM Validação
+    # TREINAR + VALIDAR
+    elif opcao == "3":
 
-eqm_validacao = erro_total / len(dados_validacao)
+        for i in range(1, 6):
 
-print(f"\nEQM Validação = {eqm_validacao:.6f}")
+            print(f"\nTREINAMENTO {i}")
+            mlp = PerceptronMultiplasCamadas()
+            mlp.inicializar_pesos()
+            dados_treinamento = mlp.carregar_dados(ARQUIVO_TREINO)
+            dados_validacao = mlp.carregar_dados(ARQUIVO_VALIDACAO)
+            mlp.treinar(dados_treinamento)
+            mlp.salvar_modelo(f"modelo_{i}.json")
+            mlp.plotar_erro()
+            eqm, resultados = mlp.validar(dados_validacao)
+
+            mlp.salvar_validacao(f"validacao_{i}.json",eqm,resultados)
+
+
+    # SAIR
+    elif opcao == "4":
+        print("\nEncerrando...")
+        break
+
+    else:
+        print("\nOpção inválida.")
