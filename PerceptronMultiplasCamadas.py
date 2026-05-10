@@ -1,3 +1,5 @@
+import csv
+import json
 import math
 import random
 
@@ -80,8 +82,6 @@ class PerceptronMultiplasCamadas:
         # Cálculo do delta da saída
         delta_saida = ((desejado - self.saida[0]) * self.derivada_sigmoid(self.saida[0]))
 
-        print("Delta saída:", delta_saida)
-
         # Atualiza pesos hidden -> saída
         for i in range(self.HIDDEN + 1):
             ajuste = (taxa_aprendizado * delta_saida * self.hidden[i] )
@@ -110,7 +110,6 @@ class PerceptronMultiplasCamadas:
                 self.backpropagation(desejado, taxa_aprendizado)
                 
             erro_quadratico_medio = erro_total / len(dados)
-            print(f"Época: {epoca}, Erro Quadrático Médio = {erro_quadratico_medio:.4f}")
 
             if erro_quadratico_medio < self.PRECISAO:
                 print("Treinamento concluído com precisão atingida.")
@@ -128,13 +127,30 @@ class PerceptronMultiplasCamadas:
                 dados.append((entradas, desejado))
 
         return dados
+    
+    def salvar_modelo(self, nome_arquivo):
+        dados = {
+            "pesos_entrada_hidden":
+                self.pesos_entrada_hidden,
+
+            "pesos_hidden_saida":
+                self.pesos_hidden_saida
+        }
+
+        with open(nome_arquivo, "w") as arquivo:
+
+            json.dump(dados, arquivo)
 
 
+    def carregar_modelo(self, nome_arquivo):
 
-mlp = PerceptronMultiplasCamadas()
+        with open(nome_arquivo, "r") as arquivo:
+            dados = json.load(arquivo)
 
-mlp.inicializar_pesos()
+        self.pesos_entrada_hidden = dados[
+            "pesos_entrada_hidden"
+        ]
 
-saida = mlp.forward(1, 0, 1)
-
-print("Saída:", saida)
+        self.pesos_hidden_saida = dados[
+            "pesos_hidden_saida"
+        ]
