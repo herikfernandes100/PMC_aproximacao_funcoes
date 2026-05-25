@@ -108,24 +108,54 @@ class PerceptronMultiplasCamadas:
 
     def treinar(self, dados):
 
+        erro_anterior = float('inf')
+
         for epoca in range(self.MAX_EPOCAS):
+
             erro_total = 0.0
 
             for entradas, desejado in dados:
-                saida = self.forward(entradas[0], entradas[1], entradas[2])
-                erro = desejado - saida
-                erro_total += erro**2
-                self.backpropagation(desejado, self.TAXA_APRENDIZADO)
-            erro_quadratico_medio = erro_total / len(dados)
-            self.historico_erro.append(erro_quadratico_medio)
 
-            if erro_quadratico_medio < self.PRECISAO:
-                print("Treinamento concluído com precisão atingida.")
+                saida = self.forward(
+                    entradas[0],
+                    entradas[1],
+                    entradas[2]
+                )
+
+                erro = desejado - saida
+
+                erro_total += erro ** 2
+
+                self.backpropagation(
+                    desejado,
+                    self.TAXA_APRENDIZADO
+                )
+
+            erro_quadratico_medio = erro_total / len(dados)
+
+            self.historico_erro.append(
+                erro_quadratico_medio
+            )
+
+            diferenca_erro = abs(
+                erro_anterior - erro_quadratico_medio
+            )
+
+            # Critério de parada
+            if diferenca_erro < self.PRECISAO:
+
+                print(
+                    "Treinamento concluído pela convergência do erro."
+                )
+
                 break
+
+            erro_anterior = erro_quadratico_medio
 
         print("\nTreinamento concluído!")
         print(f"Épocas: {epoca + 1}")
         print(f"EQM Final: {erro_quadratico_medio:.6f}")
+        print(f"Diferença final: {diferenca_erro:.10f}")
 
     def carregar_dados(self, caminho_arquivo):
         dados = []
