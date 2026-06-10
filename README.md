@@ -1,8 +1,8 @@
-# 🧠 Perceptron Multicamadas (MLP) em Python
+# 🧠 Perceptron Multiplas Camadas na Aproximação de Funções
 
-Implementação de um **Perceptron Multicamadas (MLP - Multilayer Perceptron)** desenvolvido em **Python**, com foco em aprendizado supervisionado, propagação direta (*forward propagation*), retropropagação do erro (*backpropagation*) e análise da evolução do erro durante o treinamento.
+Implementação de um **Perceptron Multiplas Camadas (PMC)** desenvolvido em **Python**, com foco em aprendizado supervisionado, propagação direta (*forward propagation*), retropropagação do erro (*backpropagation*) e análise da evolução do erro durante o treinamento.
 
-Projeto desenvolvido por **Hérik Fernandes** e **Rafael Gonçalves**.
+Projeto desenvolvido por **Hérik Fernandes**
 
 ---
 
